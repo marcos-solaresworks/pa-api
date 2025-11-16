@@ -1,0 +1,52 @@
+# Build e diretórios de saída
+bin/
+obj/
+ApiCentral/bin/
+ApiCentral/obj/
+# Arquivos de configuração locais
+appsettings.*.json
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Diretórios de publicação
+publish/
+
+# Pacotes NuGet
+*.nupkg
+# Pasta de pacotes (caso exista)
+packages/
+
+# Arquivos de log
+*.log
+
+# Diretórios do Visual Studio
+.vs/
+
+# Arquivos de depuração
+*.pdb
+
+# Arquivos temporários
+*.tmp
+*.temp
+
+# Diretórios do Rider
+.idea/
+
+# Arquivos de cache
+*.db
+*.cache
+
+# Arquivos do sistema
+Thumbs.db
+.DS_Store
+
+# Pasta de testes
+TestResults/
+
+# Pasta de configuração do launch
+Properties/launchSettings.json
+
+# Pasta de configuração do VS Code
+.vscode/

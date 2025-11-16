@@ -72,9 +72,15 @@ builder.Services.AddSingleton<IAmazonS3>(sp =>
 {
     var config = new Amazon.S3.AmazonS3Config()
     {
-        RegionEndpoint = Amazon.RegionEndpoint.USEast1,
-        ServiceURL = builder.Configuration["AWS:S3:ServiceURL"]
+        RegionEndpoint = Amazon.RegionEndpoint.USEast1
     };
+    
+    // Apenas definir ServiceURL se não for null ou vazio
+    var serviceUrl = builder.Configuration["AWS:S3:ServiceURL"];
+    if (!string.IsNullOrEmpty(serviceUrl))
+    {
+        config.ServiceURL = serviceUrl;
+    }
     
     return new Amazon.S3.AmazonS3Client(
         builder.Configuration["AWS:AccessKey"],
@@ -109,9 +115,9 @@ builder.Services.AddScoped<IMessagePublisher, RabbitMQPublisher>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 
-// Consumer dependencies
-builder.Services.AddSingleton<IMessageConsumer, LoteProcessamentoConsumer>();
-builder.Services.AddHostedService<RabbitMQConsumerService>();
+// Consumer dependencies - DESABILITADO: Worker externo consome as mensagens
+// builder.Services.AddSingleton<IMessageConsumer, LoteProcessamentoConsumer>();
+// builder.Services.AddHostedService<RabbitMQConsumerService>();
 
 // Health Checks
 builder.Services.AddHealthChecks()
