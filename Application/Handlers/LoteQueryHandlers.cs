@@ -23,9 +23,10 @@ public class GetLotesByClienteQueryHandler : IRequestHandler<GetLotesByClienteQu
             l.Cliente.Nome,
             l.NomeArquivo,
             l.Status,
-            0, // RegistrosTotal - implementar depois
-            0, // RegistrosProcessados - implementar depois  
+            3, // RegistrosTotal - sempre 3 (enviado, processando, erro/concluído)
+            LoteStatusHelper.GetRegistrosProcessadosByStatus(l.Status),
             l.DataCriacao,
+            l.CaminhoProcessadoS3,
             new List<ProcessamentoLogDto>() // Logs vazios por performance
         ));
     }
@@ -70,9 +71,26 @@ public class GetLotesQueryHandler : IRequestHandler<GetLotesQuery, IEnumerable<L
             l.NomeArquivo,
             l.Status,
             3, // registrosTotal sempre 3
-            l.Status == "Recebido" ? 1 : (l.Status == "Em Processamento" ? 2 : 3), // registrosProcessados conforme status
+            LoteStatusHelper.GetRegistrosProcessadosByStatus(l.Status),
             l.DataCriacao,
+            l.CaminhoProcessadoS3,
             new List<ProcessamentoLogDto>()
         ));
+    }
+
+}
+
+public static class LoteStatusHelper
+{
+    public static int GetRegistrosProcessadosByStatus(string status)
+    {
+        return status.ToLower() switch
+        {
+            "recebido" or "enviado" => 1,           // Primeira etapa: arquivo enviado
+            "em processamento" or "processando" => 2, // Segunda etapa: em processamento  
+            "concluído" or "concluido" or "sucesso" => 3, // Terceira etapa: concluído com sucesso
+            "erro" or "falha" or "falhado" => 3,     // Terceira etapa: concluído com erro
+            _ => 1 // Status desconhecido, assume como enviado
+        };
     }
 }

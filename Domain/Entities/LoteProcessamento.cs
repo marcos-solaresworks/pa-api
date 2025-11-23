@@ -24,6 +24,9 @@ public class LoteProcessamento
     [MaxLength(300)]
     public string CaminhoS3 { get; set; } = string.Empty;
     
+    [MaxLength(300)]
+    public string? CaminhoProcessadoS3 { get; set; }
+    
     [Required]
     [MaxLength(50)]
     public string Status { get; set; } = string.Empty;

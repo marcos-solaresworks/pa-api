@@ -79,6 +79,7 @@ public class GetLoteByIdQueryHandler : IRequestHandler<GetLoteByIdQuery, LotePro
             lote.Registros.Count,
             lote.Registros.Count, // Assumindo que todos foram processados para simplicidade
             lote.DataCriacao,
+            lote.CaminhoProcessadoS3,
             lote.Logs.Select(l => new ProcessamentoLogDto(
                 l.Mensagem ?? "",
                 l.TipoLog,
