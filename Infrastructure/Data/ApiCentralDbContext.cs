@@ -80,6 +80,7 @@ public class ApiCentralDbContext : DbContext
             entity.Property(e => e.PerfilProcessamentoId).HasColumnName("perfil_processamento_id");
             entity.Property(e => e.NomeArquivo).HasColumnName("nome_arquivo");
             entity.Property(e => e.CaminhoS3).HasColumnName("caminho_s3");
+            entity.Property(e => e.CaminhoProcessadoS3).HasColumnName("carminho_processado_s3");
             entity.Property(e => e.Status).HasColumnName("status");
             entity.Property(e => e.DataCriacao).HasColumnName("data_criacao");
             entity.Property(e => e.DataProcessamento).HasColumnName("data_processamento");
