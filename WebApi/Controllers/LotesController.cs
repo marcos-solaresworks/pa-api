@@ -103,4 +103,52 @@ public class LotesController : ControllerBase
         var result = await _mediator.Send(query);
         return Ok(result);
     }
+
+    /// <summary>
+    /// Download do arquivo processado do lote
+    /// </summary>
+    [HttpGet("{id}/download")]
+    public async Task<IActionResult> DownloadLote(int id)
+    {
+        // Buscar informações do lote
+        var loteQuery = new GetLoteByIdQuery(id);
+        var lote = await _mediator.Send(loteQuery);
+        
+        if (lote == null)
+        {
+            return NotFound("Lote não encontrado");
+        }
+
+        if (string.IsNullOrEmpty(lote.UrlArquivoProcessado))
+        {
+            return BadRequest("Arquivo processado não disponível");
+        }
+
+        try
+        {
+            // Se é uma URL pré-assinada, redireciona para ela
+            if (lote.UrlArquivoProcessado.StartsWith("https://"))
+            {
+                return Redirect(lote.UrlArquivoProcessado);
+            }
+
+            // Se é um caminho S3, faz download via serviço
+            var filePath = lote.UrlArquivoProcessado.Replace("s3://grafica-mvp-storage-qb1g7tq6/", "");
+            var storageService = HttpContext.RequestServices.GetRequiredService<ApiCentral.Domain.Interfaces.IStorageService>();
+            
+            var fileBytes = await storageService.DownloadFileAsync(filePath);
+            var fileName = System.IO.Path.GetFileName(filePath);
+            
+            // Determinar content type baseado na extensão
+            var contentType = fileName.EndsWith(".pcl") ? "application/octet-stream" : 
+                             fileName.EndsWith(".pdf") ? "application/pdf" : 
+                             "application/octet-stream";
+
+            return File(fileBytes, contentType, fileName);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest($"Erro ao baixar arquivo: {ex.Message}");
+        }
+    }
 }
