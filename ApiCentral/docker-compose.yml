@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  apicentral:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5149:5149"   # HTTP
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5149
+      - ConnectionStrings__DefaultConnection=Host=bpd-database;Database=bpdapi_db;Username=postgres;Password=EasdPG;Port=5432
+      - RabbitMQ__HostName=172.27.0.4
+      - RabbitMQ__UserName=admin
+      - RabbitMQ__Password=GraficaMVP2025!
+      - RabbitMQ__Port=5672
+      - RabbitMQ__QueueName=processamento-queue
+      - RabbitMQ__ExchangeName=processamento-exchange
+    volumes:
+      - ./appsettings.Development.json:/app/appsettings.Development.json:ro
+    restart: unless-stopped

@@ -119,6 +119,13 @@ public class LoteProcessamentoRepository : ILoteProcessamentoRepository
 
         return stats;
     }
+
+    public async Task<int> CountCreatedTodayAsync()
+    {
+        var today = DateTime.UtcNow.Date;
+        return await _context.LotesProcessamento
+            .CountAsync(l => l.DataCriacao >= today && l.DataCriacao < today.AddDays(1));
+    }
 }
 
 public class ProcessamentoLogRepository : IProcessamentoLogRepository

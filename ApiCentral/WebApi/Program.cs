@@ -33,6 +33,17 @@ builder.Host.UseSerilog();
 // Add services to the container.
 builder.Services.AddControllers();
 
+// CORS - política liberada (usar com cuidado em produção)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 // Entity Framework
 var teste = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApiCentralDbContext>(options =>
@@ -183,6 +194,9 @@ app.UseSwaggerUI(c =>
 
 // Middleware personalizado
 app.UseMiddleware<ErrorHandlingMiddleware>();
+
+// Habilitar CORS - aplicar política antes de autenticação/autorização
+app.UseCors("AllowAll");
 
 app.UseHttpsRedirection();
 

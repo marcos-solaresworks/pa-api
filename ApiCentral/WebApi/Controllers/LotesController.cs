@@ -92,4 +92,15 @@ public class LotesController : ControllerBase
         var result = await _mediator.Send(query);
         return Ok(result);
     }
+
+    /// <summary>
+    /// Listar todos os lotes e seus status
+    /// </summary>
+    [HttpGet]
+    public async Task<IActionResult> GetLotes()
+    {
+        var query = new GetLotesQuery();
+        var result = await _mediator.Send(query);
+        return Ok(result);
+    }
 }
