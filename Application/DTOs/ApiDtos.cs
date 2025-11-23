@@ -92,6 +92,7 @@ public record LoteProcessamentoDto(
     int RegistrosTotal,
     int RegistrosProcessados,
     DateTime DataCriacao,
+    string? UrlArquivoProcessado,
     List<ProcessamentoLogDto> Logs
 );
 

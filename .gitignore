@@ -50,3 +50,4 @@ Properties/launchSettings.json
 
 # Pasta de configuração do VS Code
 .vscode/
+.env
