@@ -8,27 +8,39 @@ namespace ApiCentral.Application.Handlers;
 public class GetLotesByClienteQueryHandler : IRequestHandler<GetLotesByClienteQuery, IEnumerable<LoteProcessamentoDto>>
 {
     private readonly ILoteProcessamentoRepository _loteRepository;
+    private readonly IStorageService _storageService;
 
-    public GetLotesByClienteQueryHandler(ILoteProcessamentoRepository loteRepository)
+    public GetLotesByClienteQueryHandler(ILoteProcessamentoRepository loteRepository, IStorageService storageService)
     {
         _loteRepository = loteRepository;
+        _storageService = storageService;
     }
 
     public async Task<IEnumerable<LoteProcessamentoDto>> Handle(GetLotesByClienteQuery request, CancellationToken cancellationToken)
     {
         var lotes = await _loteRepository.GetByClienteIdAsync(request.ClienteId);
         
-        return lotes.Select(l => new LoteProcessamentoDto(
-            l.Id,
-            l.Cliente.Nome,
-            l.NomeArquivo,
-            l.Status,
-            3, // RegistrosTotal - sempre 3 (enviado, processando, erro/concluído)
-            LoteStatusHelper.GetRegistrosProcessadosByStatus(l.Status),
-            l.DataCriacao,
-            l.CaminhoProcessadoS3,
-            new List<ProcessamentoLogDto>() // Logs vazios por performance
-        ));
+        return lotes.Select(l => {
+            // Gerar URL pré-assinada se o arquivo processado existir
+            string? urlArquivoProcessado = null;
+            if (!string.IsNullOrEmpty(l.CaminhoProcessadoS3))
+            {
+                var filePath = l.CaminhoProcessadoS3.Replace("s3://grafica-mvp-storage-qb1g7tq6/", "");
+                urlArquivoProcessado = _storageService.GeneratePresignedUrl(filePath, TimeSpan.FromHours(1));
+            }
+            
+            return new LoteProcessamentoDto(
+                l.Id,
+                l.Cliente.Nome,
+                l.NomeArquivo,
+                l.Status,
+                3, // RegistrosTotal - sempre 3 (enviado, processando, erro/concluído)
+                LoteStatusHelper.GetRegistrosProcessadosByStatus(l.Status),
+                l.DataCriacao,
+                urlArquivoProcessado,
+                new List<ProcessamentoLogDto>() // Logs vazios por performance
+            );
+        });
     }
 }
 
@@ -56,26 +68,38 @@ public class GetLoteLogsQueryHandler : IRequestHandler<GetLoteLogsQuery, IEnumer
 public class GetLotesQueryHandler : IRequestHandler<GetLotesQuery, IEnumerable<LoteProcessamentoDto>>
 {
     private readonly ILoteProcessamentoRepository _loteRepository;
+    private readonly IStorageService _storageService;
 
-    public GetLotesQueryHandler(ILoteProcessamentoRepository loteRepository)
+    public GetLotesQueryHandler(ILoteProcessamentoRepository loteRepository, IStorageService storageService)
     {
         _loteRepository = loteRepository;
+        _storageService = storageService;
     }
 
     public async Task<IEnumerable<LoteProcessamentoDto>> Handle(GetLotesQuery request, CancellationToken cancellationToken)
     {
         var lotes = await _loteRepository.GetAllAsync();
-        return lotes.Select(l => new LoteProcessamentoDto(
-            l.Id,
-            l.Cliente?.Nome ?? "",
-            l.NomeArquivo,
-            l.Status,
-            3, // registrosTotal sempre 3
-            LoteStatusHelper.GetRegistrosProcessadosByStatus(l.Status),
-            l.DataCriacao,
-            l.CaminhoProcessadoS3,
-            new List<ProcessamentoLogDto>()
-        ));
+        return lotes.Select(l => {
+            // Gerar URL pré-assinada se o arquivo processado existir
+            string? urlArquivoProcessado = null;
+            if (!string.IsNullOrEmpty(l.CaminhoProcessadoS3))
+            {
+                var filePath = l.CaminhoProcessadoS3.Replace("s3://grafica-mvp-storage-qb1g7tq6/", "");
+                urlArquivoProcessado = _storageService.GeneratePresignedUrl(filePath, TimeSpan.FromHours(1));
+            }
+            
+            return new LoteProcessamentoDto(
+                l.Id,
+                l.Cliente?.Nome ?? "",
+                l.NomeArquivo,
+                l.Status,
+                3, // registrosTotal sempre 3
+                LoteStatusHelper.GetRegistrosProcessadosByStatus(l.Status),
+                l.DataCriacao,
+                urlArquivoProcessado,
+                new List<ProcessamentoLogDto>()
+            );
+        });
     }
 
 }
