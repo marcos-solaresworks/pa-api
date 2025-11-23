@@ -20,3 +20,9 @@ services:
     volumes:
       - ./appsettings.Development.json:/app/appsettings.Development.json:ro
     restart: unless-stopped
+    networks:
+      - grafica-net
+
+networks:
+  grafica-net:
+    external: true
