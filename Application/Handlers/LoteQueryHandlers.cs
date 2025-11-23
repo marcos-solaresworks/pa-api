@@ -79,18 +79,3 @@ public class GetLotesQueryHandler : IRequestHandler<GetLotesQuery, IEnumerable<L
     }
 
 }
-
-public static class LoteStatusHelper
-{
-    public static int GetRegistrosProcessadosByStatus(string status)
-    {
-        return status.ToLower() switch
-        {
-            "recebido" or "enviado" => 1,           // Primeira etapa: arquivo enviado
-            "em processamento" or "processando" => 2, // Segunda etapa: em processamento  
-            "concluído" or "concluido" or "sucesso" => 3, // Terceira etapa: concluído com sucesso
-            "erro" or "falha" or "falhado" => 3,     // Terceira etapa: concluído com erro
-            _ => 1 // Status desconhecido, assume como enviado
-        };
-    }
-}
