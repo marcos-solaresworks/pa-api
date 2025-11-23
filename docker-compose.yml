@@ -17,6 +17,10 @@ services:
       - RabbitMQ__Port=5672
       - RabbitMQ__QueueName=processamento-queue
       - RabbitMQ__ExchangeName=processamento-exchange
+      - AWS__AccessKey=
+      - AWS__SecretKey=
+      - AWS__S3__BucketName=grafica-mvp-storage-qb1g7tq6
+      - AWS__S3__Region=us-east-1
     volumes:
       - ./appsettings.Development.json:/app/appsettings.Development.json:ro
     restart: unless-stopped

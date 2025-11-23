@@ -110,45 +110,41 @@ public class LotesController : ControllerBase
     [HttpGet("{id}/download")]
     public async Task<IActionResult> DownloadLote(int id)
     {
-        // Buscar informações do lote
-        var loteQuery = new GetLoteByIdQuery(id);
-        var lote = await _mediator.Send(loteQuery);
+        // Buscar informações do lote pela query básica (sem URL pré-assinada)
+        var loteRepository = HttpContext.RequestServices.GetRequiredService<ApiCentral.Domain.Interfaces.ILoteProcessamentoRepository>();
+        var lote = await loteRepository.GetByIdWithDetailsAsync(id);
         
         if (lote == null)
         {
             return NotFound("Lote não encontrado");
         }
 
-        if (string.IsNullOrEmpty(lote.UrlArquivoProcessado))
+        if (string.IsNullOrEmpty(lote.CaminhoProcessadoS3))
         {
             return BadRequest("Arquivo processado não disponível");
         }
 
         try
         {
-            // Se é uma URL pré-assinada, redireciona para ela
-            if (lote.UrlArquivoProcessado.StartsWith("https://"))
-            {
-                return Redirect(lote.UrlArquivoProcessado);
-            }
-
-            // Se é um caminho S3, faz download via serviço
-            var filePath = lote.UrlArquivoProcessado.Replace("s3://grafica-mvp-storage-qb1g7tq6/", "");
             var storageService = HttpContext.RequestServices.GetRequiredService<ApiCentral.Domain.Interfaces.IStorageService>();
             
-            var fileBytes = await storageService.DownloadFileAsync(filePath);
-            var fileName = System.IO.Path.GetFileName(filePath);
+            // Tentar gerar URL pré-assinada primeiro (mais eficiente)
+            var filePath = lote.CaminhoProcessadoS3.Replace("s3://grafica-mvp-storage-qb1g7tq6/", "");
             
-            // Determinar content type baseado na extensão
-            var contentType = fileName.EndsWith(".pcl") ? "application/octet-stream" : 
-                             fileName.EndsWith(".pdf") ? "application/pdf" : 
-                             "application/octet-stream";
-
-            return File(fileBytes, contentType, fileName);
+            try
+            {
+                var presignedUrl = storageService.GeneratePresignedUrl(filePath, TimeSpan.FromMinutes(5));
+                return Redirect(presignedUrl);
+            }
+            catch (Exception)
+            {
+                // Se falhar a URL pré-assinada, retorna erro
+                return BadRequest("Credenciais AWS não configuradas corretamente. Não é possível gerar URL de download.");
+            }
         }
         catch (Exception ex)
         {
-            return BadRequest($"Erro ao baixar arquivo: {ex.Message}");
+            return BadRequest($"Erro ao processar download: {ex.Message}");
         }
     }
 }
