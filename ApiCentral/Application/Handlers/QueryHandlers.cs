@@ -87,3 +87,28 @@ public class GetLoteByIdQueryHandler : IRequestHandler<GetLoteByIdQuery, LotePro
         );
     }
 }
+
+public class GetUsuarioByIdQueryHandler : IRequestHandler<GetUsuarioByIdQuery, UsuarioDto?>
+{
+    private readonly IUsuarioRepository _usuarioRepository;
+
+    public GetUsuarioByIdQueryHandler(IUsuarioRepository usuarioRepository)
+    {
+        _usuarioRepository = usuarioRepository;
+    }
+
+    public async Task<UsuarioDto?> Handle(GetUsuarioByIdQuery request, CancellationToken cancellationToken)
+    {
+        var usuario = await _usuarioRepository.GetByIdAsync(request.Id);
+        if (usuario == null)
+            return null;
+
+        return new UsuarioDto(
+            usuario.Id,
+            usuario.Nome,
+            usuario.Email,
+            usuario.Perfil,
+            usuario.DataCriacao
+        );
+    }
+}

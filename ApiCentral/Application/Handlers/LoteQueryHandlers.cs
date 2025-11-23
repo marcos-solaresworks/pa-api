@@ -51,3 +51,28 @@ public class GetLoteLogsQueryHandler : IRequestHandler<GetLoteLogsQuery, IEnumer
         ));
     }
 }
+
+public class GetLotesQueryHandler : IRequestHandler<GetLotesQuery, IEnumerable<LoteProcessamentoDto>>
+{
+    private readonly ILoteProcessamentoRepository _loteRepository;
+
+    public GetLotesQueryHandler(ILoteProcessamentoRepository loteRepository)
+    {
+        _loteRepository = loteRepository;
+    }
+
+    public async Task<IEnumerable<LoteProcessamentoDto>> Handle(GetLotesQuery request, CancellationToken cancellationToken)
+    {
+        var lotes = await _loteRepository.GetAllAsync();
+        return lotes.Select(l => new LoteProcessamentoDto(
+            l.Id,
+            l.Cliente?.Nome ?? "",
+            l.NomeArquivo,
+            l.Status,
+            3, // registrosTotal sempre 3
+            l.Status == "Recebido" ? 1 : (l.Status == "Em Processamento" ? 2 : 3), // registrosProcessados conforme status
+            l.DataCriacao,
+            new List<ProcessamentoLogDto>()
+        ));
+    }
+}

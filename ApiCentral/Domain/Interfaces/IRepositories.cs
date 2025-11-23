@@ -51,6 +51,7 @@ public interface ILoteProcessamentoRepository
     Task<bool> DeleteAsync(int id);
     Task<int> CountAsync();
     Task<int> CountByStatusAsync(string status);
+    Task<int> CountCreatedTodayAsync();
     Task<object> GetProcessingStatisticsAsync(DateTime startDate, DateTime endDate);
 }
 

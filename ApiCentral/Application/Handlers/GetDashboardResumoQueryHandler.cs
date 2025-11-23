@@ -31,8 +31,8 @@ namespace ApiCentral.Application.Handlers
             var lotesConcluidos = await _loteRepository.CountByStatusAsync("Concluído");
             var lotesComErro = await _loteRepository.CountByStatusAsync("Erro");
             
-            var totalProcessamentos = await _logRepository.CountAsync();
-            var processamentosHoje = await _logRepository.CountTodayAsync();
+            var totalProcessamentos = await _loteRepository.CountAsync();
+            var processamentosHoje = await _loteRepository.CountCreatedTodayAsync();
             var processamentosSucesso = await _logRepository.CountByStatusAsync("Sucesso");
             var processamentosErro = await _logRepository.CountByStatusAsync("Erro");
 
