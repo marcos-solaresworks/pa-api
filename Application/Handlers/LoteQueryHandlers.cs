@@ -25,8 +25,16 @@ public class GetLotesByClienteQueryHandler : IRequestHandler<GetLotesByClienteQu
             string? urlArquivoProcessado = null;
             if (!string.IsNullOrEmpty(l.CaminhoProcessadoS3))
             {
-                var filePath = l.CaminhoProcessadoS3.Replace("s3://grafica-mvp-storage-qb1g7tq6/", "");
-                urlArquivoProcessado = _storageService.GeneratePresignedUrl(filePath, TimeSpan.FromHours(1));
+                try
+                {
+                    var filePath = l.CaminhoProcessadoS3.Replace("s3://grafica-mvp-storage-qb1g7tq6/", "");
+                    urlArquivoProcessado = _storageService.GeneratePresignedUrl(filePath, TimeSpan.FromHours(1));
+                }
+                catch (Exception)
+                {
+                    // Se falhar ao gerar URL pré-assinada, retorna o caminho S3 original
+                    urlArquivoProcessado = l.CaminhoProcessadoS3;
+                }
             }
             
             return new LoteProcessamentoDto(
@@ -84,8 +92,16 @@ public class GetLotesQueryHandler : IRequestHandler<GetLotesQuery, IEnumerable<L
             string? urlArquivoProcessado = null;
             if (!string.IsNullOrEmpty(l.CaminhoProcessadoS3))
             {
-                var filePath = l.CaminhoProcessadoS3.Replace("s3://grafica-mvp-storage-qb1g7tq6/", "");
-                urlArquivoProcessado = _storageService.GeneratePresignedUrl(filePath, TimeSpan.FromHours(1));
+                try
+                {
+                    var filePath = l.CaminhoProcessadoS3.Replace("s3://grafica-mvp-storage-qb1g7tq6/", "");
+                    urlArquivoProcessado = _storageService.GeneratePresignedUrl(filePath, TimeSpan.FromHours(1));
+                }
+                catch (Exception)
+                {
+                    // Se falhar ao gerar URL pré-assinada, retorna o caminho S3 original
+                    urlArquivoProcessado = l.CaminhoProcessadoS3;
+                }
             }
             
             return new LoteProcessamentoDto(

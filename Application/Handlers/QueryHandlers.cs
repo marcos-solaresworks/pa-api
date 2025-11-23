@@ -77,9 +77,17 @@ public class GetLoteByIdQueryHandler : IRequestHandler<GetLoteByIdQuery, LotePro
         string? urlArquivoProcessado = null;
         if (!string.IsNullOrEmpty(lote.CaminhoProcessadoS3))
         {
-            // Extrair apenas o caminho do arquivo (remover s3://bucket-name/)
-            var filePath = lote.CaminhoProcessadoS3.Replace("s3://grafica-mvp-storage-qb1g7tq6/", "");
-            urlArquivoProcessado = _storageService.GeneratePresignedUrl(filePath, TimeSpan.FromHours(1));
+            try
+            {
+                // Extrair apenas o caminho do arquivo (remover s3://bucket-name/)
+                var filePath = lote.CaminhoProcessadoS3.Replace("s3://grafica-mvp-storage-qb1g7tq6/", "");
+                urlArquivoProcessado = _storageService.GeneratePresignedUrl(filePath, TimeSpan.FromHours(1));
+            }
+            catch (Exception)
+            {
+                // Se falhar ao gerar URL pré-assinada, retorna o caminho S3 original
+                urlArquivoProcessado = lote.CaminhoProcessadoS3;
+            }
         }
 
         return new LoteProcessamentoDto(
