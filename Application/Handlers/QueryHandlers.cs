@@ -109,7 +109,7 @@ public class GetUsuarioByIdQueryHandler : IRequestHandler<GetUsuarioByIdQuery, U
             usuario.Nome,
             usuario.Email,
             usuario.Perfil,
-            usuario.UltimoLogin ?? usuario.DataCriacao
+            usuario.UltimoLogin
         );
     }
 }
