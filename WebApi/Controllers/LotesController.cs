@@ -103,4 +103,21 @@ public class LotesController : ControllerBase
         var result = await _mediator.Send(query);
         return Ok(result);
     }
+
+    /// <summary>
+    /// Download do arquivo processado de um lote
+    /// </summary>
+    [HttpGet("{id}/download")]
+    public async Task<ActionResult> DownloadLote(int id)
+    {
+        var query = new GetLoteDownloadQuery(id);
+        var result = await _mediator.Send(query);
+        
+        if (result == null)
+        {
+            return NotFound("Lote não encontrado ou arquivo não disponível para download");
+        }
+
+        return File(result.FileContent, result.ContentType, result.FileName);
+    }
 }

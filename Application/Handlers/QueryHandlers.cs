@@ -58,10 +58,12 @@ public class GetPerfilProcessamentoQueryHandler : IRequestHandler<GetPerfilProce
 public class GetLoteByIdQueryHandler : IRequestHandler<GetLoteByIdQuery, LoteProcessamentoDto?>
 {
     private readonly ILoteProcessamentoRepository _loteRepository;
+    private readonly IStorageService _storageService;
 
-    public GetLoteByIdQueryHandler(ILoteProcessamentoRepository loteRepository)
+    public GetLoteByIdQueryHandler(ILoteProcessamentoRepository loteRepository, IStorageService storageService)
     {
         _loteRepository = loteRepository;
+        _storageService = storageService;
     }
 
     public async Task<LoteProcessamentoDto?> Handle(GetLoteByIdQuery request, CancellationToken cancellationToken)
@@ -71,6 +73,21 @@ public class GetLoteByIdQueryHandler : IRequestHandler<GetLoteByIdQuery, LotePro
         if (lote == null)
             return null;
 
+        // Gerar URL pré-assinada se existe arquivo processado
+        string? urlArquivoProcessado = null;
+        if (!string.IsNullOrEmpty(lote.CaminhoProcessadoS3))
+        {
+            try
+            {
+                urlArquivoProcessado = _storageService.GeneratePresignedUrl(lote.CaminhoProcessadoS3, TimeSpan.FromHours(1));
+            }
+            catch
+            {
+                // Se falhar ao gerar URL, deixa como null
+                urlArquivoProcessado = null;
+            }
+        }
+
         return new LoteProcessamentoDto(
             lote.Id,
             lote.Cliente.Nome,
@@ -79,7 +96,7 @@ public class GetLoteByIdQueryHandler : IRequestHandler<GetLoteByIdQuery, LotePro
             3, // RegistrosTotal - sempre 3 (enviado, processando, erro/concluído)
             LoteStatusHelper.GetRegistrosProcessadosByStatus(lote.Status),
             lote.DataCriacao,
-            lote.CaminhoProcessadoS3,
+            urlArquivoProcessado,
             lote.Logs.Select(l => new ProcessamentoLogDto(
                 l.Mensagem ?? "",
                 l.TipoLog,

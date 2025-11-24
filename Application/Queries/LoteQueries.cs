@@ -8,3 +8,5 @@ public record GetLotesByClienteQuery(int ClienteId) : IRequest<IEnumerable<LoteP
 public record GetLoteLogsQuery(int LoteId) : IRequest<IEnumerable<ProcessamentoLogDto>>;
 
 public record GetLotesQuery() : IRequest<IEnumerable<LoteProcessamentoDto>>;
+
+public record GetLoteDownloadQuery(int LoteId) : IRequest<LoteDownloadDto?>;

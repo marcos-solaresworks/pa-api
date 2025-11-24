@@ -115,3 +115,9 @@ public record DashboardResumoDto(
     int ProcessamentosErro,
     object EstatisticasUltimos30Dias
 );
+
+public record LoteDownloadDto(
+    byte[] FileContent,
+    string FileName,
+    string ContentType
+);
