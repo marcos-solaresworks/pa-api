@@ -84,6 +84,19 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // AWS S3
 builder.Services.AddSingleton<IAmazonS3>(sp =>
 {
+    var accessKey = builder.Configuration["AWS:AccessKey"];
+    var secretKey = builder.Configuration["AWS:SecretKey"];
+    var bucketName = builder.Configuration["AWS:S3:BucketName"];
+    var region = builder.Configuration["AWS:S3:Region"];
+    
+    // Log das credenciais para debug (mascarar parcialmente por segurança)
+    Log.Information("=== AWS CREDENTIALS DEBUG ===");
+    Log.Information("AWS:AccessKey = {AccessKey}", string.IsNullOrEmpty(accessKey) ? "VAZIO" : $"{accessKey[..4]}...{accessKey[^4..]}");
+    Log.Information("AWS:SecretKey = {SecretKey}", string.IsNullOrEmpty(secretKey) ? "VAZIO" : $"{secretKey[..4]}...{secretKey[^4..]}");
+    Log.Information("AWS:S3:BucketName = {BucketName}", bucketName);
+    Log.Information("AWS:S3:Region = {Region}", region);
+    Log.Information("===============================");
+    
     var config = new Amazon.S3.AmazonS3Config()
     {
         RegionEndpoint = Amazon.RegionEndpoint.USEast1
@@ -96,11 +109,7 @@ builder.Services.AddSingleton<IAmazonS3>(sp =>
         config.ServiceURL = serviceUrl;
     }
     
-    return new Amazon.S3.AmazonS3Client(
-        builder.Configuration["AWS:AccessKey"],
-        builder.Configuration["AWS:SecretKey"],
-        config
-    );
+    return new Amazon.S3.AmazonS3Client(accessKey, secretKey, config);
 });
 
 // RabbitMQ
