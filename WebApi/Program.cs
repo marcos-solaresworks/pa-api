@@ -50,7 +50,10 @@ builder.Services.AddDbContext<ApiCentralDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // MediatR
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+builder.Services.AddMediatR(cfg => {
+    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+    cfg.RegisterServicesFromAssemblyContaining<ApiCentral.Application.Handlers.UploadLoteCommandHandler>();
+});
 
 // FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
