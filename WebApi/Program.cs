@@ -90,7 +90,9 @@ builder.Services.AddSingleton<IAmazonS3>(sp =>
     var region = builder.Configuration["AWS:S3:Region"];
     
     // Log das credenciais para debug (mascarar parcialmente por segurança)
+    var testEnvVar = Environment.GetEnvironmentVariable("TEST_ENV_VAR");
     Log.Information("=== AWS CREDENTIALS DEBUG ===");
+    Log.Information("TEST_ENV_VAR = {TestVar}", testEnvVar ?? "VAZIO");
     Log.Information("AWS:AccessKey = {AccessKey}", string.IsNullOrEmpty(accessKey) ? "VAZIO" : $"{accessKey[..4]}...{accessKey[^4..]}");
     Log.Information("AWS:SecretKey = {SecretKey}", string.IsNullOrEmpty(secretKey) ? "VAZIO" : $"{secretKey[..4]}...{secretKey[^4..]}");
     Log.Information("AWS:S3:BucketName = {BucketName}", bucketName);
