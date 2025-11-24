@@ -10,18 +10,13 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:5149
-      - ConnectionStrings__DefaultConnection=Host=bpd-database;Database=bpdapi_db;Username=postgres;Password=EasdPG;Port=5432
-      - RabbitMQ__HostName=172.27.0.4
+      - ConnectionStrings__DefaultConnection=Host=grafica-mvp-postgres.csxueyi2miv2.us-east-1.rds.amazonaws.com;Database=bpdapi_db;Username=postgres;Password=GraficaMVP2025!;Port=5432
+      - RabbitMQ__HostName=rabbitmq
       - RabbitMQ__UserName=admin
       - RabbitMQ__Password=GraficaMVP2025!
       - RabbitMQ__Port=5672
-      - RabbitMQ__QueueName=processamento-queue
-      - RabbitMQ__ExchangeName=processamento-exchange
-      - AWS__AccessKey=${AWS_ACCESS_KEY}
-      - AWS__SecretKey=${AWS_SECRET_KEY}
-      - AWS__S3__BucketName=${AWS_S3_BUCKET_NAME}
-      - AWS__S3__Region=${AWS_S3_REGION}
-      - TEST_ENV_VAR=${AWS_ACCESS_KEY}
+      - RabbitMQ__QueueName=lote.processamento
+      - RabbitMQ__ExchangeName=graficaltda.exchange
     volumes:
       - ./appsettings.Development.json:/app/appsettings.Development.json:ro
     restart: unless-stopped
