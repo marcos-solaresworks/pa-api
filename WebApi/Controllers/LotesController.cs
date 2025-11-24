@@ -103,48 +103,4 @@ public class LotesController : ControllerBase
         var result = await _mediator.Send(query);
         return Ok(result);
     }
-
-    /// <summary>
-    /// Download do arquivo processado do lote
-    /// </summary>
-    [HttpGet("{id}/download")]
-    public async Task<IActionResult> DownloadLote(int id)
-    {
-        // Buscar informações do lote pela query básica (sem URL pré-assinada)
-        var loteRepository = HttpContext.RequestServices.GetRequiredService<ApiCentral.Domain.Interfaces.ILoteProcessamentoRepository>();
-        var lote = await loteRepository.GetByIdWithDetailsAsync(id);
-        
-        if (lote == null)
-        {
-            return NotFound("Lote não encontrado");
-        }
-
-        if (string.IsNullOrEmpty(lote.CaminhoProcessadoS3))
-        {
-            return BadRequest("Arquivo processado não disponível");
-        }
-
-        try
-        {
-            var storageService = HttpContext.RequestServices.GetRequiredService<ApiCentral.Domain.Interfaces.IStorageService>();
-            
-            // Tentar gerar URL pré-assinada primeiro (mais eficiente)
-            var filePath = lote.CaminhoProcessadoS3.Replace("s3://grafica-mvp-storage-qb1g7tq6/", "");
-            
-            try
-            {
-                var presignedUrl = storageService.GeneratePresignedUrl(filePath, TimeSpan.FromMinutes(5));
-                return Redirect(presignedUrl);
-            }
-            catch (Exception)
-            {
-                // Se falhar a URL pré-assinada, retorna erro
-                return BadRequest("Credenciais AWS não configuradas corretamente. Não é possível gerar URL de download.");
-            }
-        }
-        catch (Exception ex)
-        {
-            return BadRequest($"Erro ao processar download: {ex.Message}");
-        }
-    }
 }

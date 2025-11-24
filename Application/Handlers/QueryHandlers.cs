@@ -58,12 +58,10 @@ public class GetPerfilProcessamentoQueryHandler : IRequestHandler<GetPerfilProce
 public class GetLoteByIdQueryHandler : IRequestHandler<GetLoteByIdQuery, LoteProcessamentoDto?>
 {
     private readonly ILoteProcessamentoRepository _loteRepository;
-    private readonly IStorageService _storageService;
 
-    public GetLoteByIdQueryHandler(ILoteProcessamentoRepository loteRepository, IStorageService storageService)
+    public GetLoteByIdQueryHandler(ILoteProcessamentoRepository loteRepository)
     {
         _loteRepository = loteRepository;
-        _storageService = storageService;
     }
 
     public async Task<LoteProcessamentoDto?> Handle(GetLoteByIdQuery request, CancellationToken cancellationToken)
@@ -73,23 +71,6 @@ public class GetLoteByIdQueryHandler : IRequestHandler<GetLoteByIdQuery, LotePro
         if (lote == null)
             return null;
 
-        // Gerar URL pré-assinada se o arquivo processado existir
-        string? urlArquivoProcessado = null;
-        if (!string.IsNullOrEmpty(lote.CaminhoProcessadoS3))
-        {
-            try
-            {
-                // Extrair apenas o caminho do arquivo (remover s3://bucket-name/)
-                var filePath = lote.CaminhoProcessadoS3.Replace("s3://grafica-mvp-storage-qb1g7tq6/", "");
-                urlArquivoProcessado = _storageService.GeneratePresignedUrl(filePath, TimeSpan.FromHours(1));
-            }
-            catch (Exception)
-            {
-                // Se falhar ao gerar URL pré-assinada, retorna o caminho S3 original
-                urlArquivoProcessado = lote.CaminhoProcessadoS3;
-            }
-        }
-
         return new LoteProcessamentoDto(
             lote.Id,
             lote.Cliente.Nome,
@@ -98,7 +79,7 @@ public class GetLoteByIdQueryHandler : IRequestHandler<GetLoteByIdQuery, LotePro
             3, // RegistrosTotal - sempre 3 (enviado, processando, erro/concluído)
             LoteStatusHelper.GetRegistrosProcessadosByStatus(lote.Status),
             lote.DataCriacao,
-            urlArquivoProcessado,
+            lote.CaminhoProcessadoS3,
             lote.Logs.Select(l => new ProcessamentoLogDto(
                 l.Mensagem ?? "",
                 l.TipoLog,
